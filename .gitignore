@@ -17,3 +17,8 @@
 .DS_Store
 
 *.idea
+
+*.log*
+/log
+/logs
+main
