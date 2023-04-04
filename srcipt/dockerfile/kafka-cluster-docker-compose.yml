@@ -1,0 +1,103 @@
+version: "3"
+
+# 集群3节点kafka
+
+services:
+  zookeeper:
+    container_name: zookeeper
+    hostname: zookeeper
+    image: docker.io/bitnami/zookeeper:3.8
+    ports:
+      - "2181:2181"
+    environment:
+      - TZ=Asia/Shanghai
+      - ALLOW_ANONYMOUS_LOGIN=yes
+      - ZOO_SERVER_ID=1
+      - ZOO_PORT_NUMBER=2181
+    volumes:
+      - /docker/zookeeper/data:/bitnami/zookeeper
+  kafka-0:
+    container_name: kafka-0
+    hostname: kafka-0
+    image: docker.io/bitnami/kafka:3.4
+    ports:
+      #      - "9093:9093"
+      - "19093:19093"
+    environment:
+      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
+      - KAFKA_CFG_BROKER_ID=0
+      - ALLOW_PLAINTEXT_LISTENER=yes
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
+      - KAFKA_CFG_LISTENERS=INTERNAL://:9093,EXTERNAL://0.0.0.0:19093
+      - KAFKA_CFG_ADVERTISED_LISTENERS=INTERNAL://kafka-0:9093,EXTERNAL://101.43.215.103:19093
+      - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=INTERNAL
+    volumes:
+      - /docker/kafka/data-0:/bitnami/kafka
+#    deploy:
+#      resources:
+#        limits:
+#          memory: 386M
+    depends_on:
+      - zookeeper
+  kafka-1:
+    container_name: kafka-1
+    hostname: kafka-1
+    image: docker.io/bitnami/kafka:3.4
+    ports:
+      #      - "9094:9094"
+      - "19094:19094"
+    environment:
+      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
+      - KAFKA_CFG_BROKER_ID=1
+      - ALLOW_PLAINTEXT_LISTENER=yes
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
+      - KAFKA_CFG_LISTENERS=INTERNAL://:9094,EXTERNAL://0.0.0.0:19094
+      - KAFKA_CFG_ADVERTISED_LISTENERS=INTERNAL://kafka-1:9094,EXTERNAL://101.43.215.103:19094
+      - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=INTERNAL
+    volumes:
+      - /docker/kafka/data-1:/bitnami/kafka
+#    deploy:
+#      resources:
+#        limits:
+#          memory: 386M
+    depends_on:
+      - zookeeper
+  kafka-2:
+    container_name: kafka-2
+    hostname: kafka-2
+    image: docker.io/bitnami/kafka:3.4
+    ports:
+      #      - "9095:9095"
+      - "19095:19095"
+    environment:
+      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
+      - KAFKA_CFG_BROKER_ID=2
+      - ALLOW_PLAINTEXT_LISTENER=yes
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
+      - KAFKA_CFG_LISTENERS=INTERNAL://:9095,EXTERNAL://0.0.0.0:19095
+      - KAFKA_CFG_ADVERTISED_LISTENERS=INTERNAL://kafka-2:9095,EXTERNAL://101.43.215.103:19095
+      - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=INTERNAL
+    volumes:
+      - /docker/kafka/data-2:/bitnami/kafka
+#    deploy:
+#      resources:
+#        limits:
+#          memory: 386M
+    depends_on:
+      - zookeeper
+  kafka-manager:
+    image: sheepkiller/kafka-manager:latest
+    container_name: kafka-manager
+    hostname: kafka-manager
+    ports:
+      - "19092:19092"
+    environment:
+      ZK_HOSTS: zookeeper:2181
+      APPLICATION_SECRET: P@ssw0rd
+      KAFKA_MANAGER_USERNAME: admin
+      KAFKA_MANAGER_PASSWORD: P@ssw0rd
+      KM_ARGS: -Dhttp.port=19092
+    depends_on:
+      - kafka-0
+      - kafka-1
+      - kafka-2

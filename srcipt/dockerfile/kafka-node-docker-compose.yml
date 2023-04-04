@@ -15,32 +15,30 @@ services:
       ZOO_PORT_NUMBER: 2181
     volumes:
       - /docker/zookeeper/data:/bitnami/zookeeper/data
-    network_mode: "host"
 
   kafka:
     image: 'bitnami/kafka:3.2.0'
     container_name: kafka
     ports:
       - "9092:9092"
-      - "9093:9093"
+#      - "9093:9093"
     environment:
       TZ: Asia/Shanghai
       # 更多变量 查看文档 https://Github.com/bitnami/bitnami-docker-kafka/blob/master/README.md
       KAFKA_BROKER_ID: 1
-      KAFKA_CFG_ZOOKEEPER_CONNECT: 127.0.0.1:2181
+      KAFKA_CFG_ZOOKEEPER_CONNECT: zookeeper:2181
       # 为了使内网和外网都能连接使用，需要为每一种客户端配置一个监听器
-      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: CLIENT:PLAINTEXT,EXTERNAL:PLAINTEXT
-      KAFKA_CFG_LISTENERS: CLIENT://:9093,EXTERNAL://:9092
+      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
+      KAFKA_CFG_LISTENERS: INTERNAL://:9093,EXTERNAL://:9092
       # 配置内网(ip 10.0.24.10)通过9093端口访问， 外网(ip 101.43.215.103)通过9092访问
-      KAFKA_CFG_ADVERTISED_LISTENERS: CLIENT://10.0.24.10:9093,EXTERNAL://101.43.215.103:9092
+      KAFKA_CFG_ADVERTISED_LISTENERS: INTERNAL://kafka:9093,EXTERNAL://101.43.215.103:9092
       ALLOW_PLAINTEXT_LISTENER: "yes"
-      # 设置使用client作为内部监听
-      KAFKA_INTER_BROKER_LISTENER_NAME: CLIENT
+      # 设置使用INTERNAL作为内部监听
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
     volumes:
       - /docker/kafka/data:/bitnami/kafka/data
     depends_on:
       - zookeeper
-    network_mode: "host"
 
   kafka-manager:
     image: sheepkiller/kafka-manager:latest
@@ -48,11 +46,10 @@ services:
     ports:
       - "19092:19092"
     environment:
-      ZK_HOSTS: 127.0.0.1:2181
+      ZK_HOSTS: zookeeper:2181
       APPLICATION_SECRET: P@ssw0rd
       KAFKA_MANAGER_USERNAME: admin
       KAFKA_MANAGER_PASSWORD: P@ssw0rd
       KM_ARGS: -Dhttp.port=19092
     depends_on:
       - kafka
-    network_mode: "host"
