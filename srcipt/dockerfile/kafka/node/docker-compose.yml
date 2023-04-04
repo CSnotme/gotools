@@ -2,6 +2,8 @@
 # kafka + zookeeper + kafka-manager
 version: '3'
 
+# 单节点kafka
+
 services:
   zookeeper:
     image: 'bitnami/zookeeper:3.8.0'

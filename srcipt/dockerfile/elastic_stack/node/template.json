@@ -1,0 +1,27 @@
+{
+  "template": "logstash-*",
+  "settings": {
+    "number_of_shards": 1,
+    "number_of_replicas": 0
+  },
+  "mappings": {
+    "properties": {
+      "logclass": {
+        "type": "text"
+      },
+      "logdate": {
+        "type": "date",
+        "format": "yyyy-MM-dd HH:mm:ss.SSS"
+      },
+      "loglevel": {
+        "type": "keyword"
+      },
+      "logthread": {
+        "type": "keyword"
+      },
+      "logmsg": {
+        "type": "text"
+      }
+    }
+  }
+}
